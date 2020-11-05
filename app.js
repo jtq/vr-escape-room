@@ -18,8 +18,10 @@ const io = socketio(server);
 
 let state = {
   users: {},
-  box1: {
-    position: 50
+  scene: {
+    box1: {
+      position: 50
+    }
   }
 };
 
