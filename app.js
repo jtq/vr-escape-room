@@ -17,26 +17,37 @@ const server = app.listen(process.env.PORT || 3000, () => {
 const io = socketio(server);
 
 let state = {
+  users: {},
   box1: {
     position: 50
   }
 };
 
 io.on('connection', socket => {
-  socket.username = "Anonymous";
-  console.log(`New user connected: ${socket.username}`);
-  io.sockets.emit('sync_state', state);
+  socket.user = {};
+  console.log(`New user connected (anonymous)`);
 
   socket.on('set_user', data => {
-    console.log(`set_user: ${socket.username} changed name to ${data.username}`);
-    socket.username = data.username;
+    console.log(`set_user: ${socket.user.name} changed settings to ${JSON.stringify(data)}`);
+    socket.user = data;
+    state.users = mergeState(state.users, { [data.name]: data });
+
+    io.sockets.emit('sync_state', state);
   });
 
   socket.on('update_state', newState => {
     console.log(`update_state: ${JSON.stringify(newState)}`);
-    state = mergeState(newState);
+    state = mergeState(state, newState);
     io.sockets.emit('sync_state', state);
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`User : ${socket.user.name} disconnected`);
+    if(socket.user.name) {
+      delete(state.users[socket.user.name]);
+      io.sockets.emit('sync_state', state);
+    }
   });
 });
 
-const mergeState = (newState) => ({...state, ...newState});
+const mergeState = (state, newState) => ({...state, ...newState});
