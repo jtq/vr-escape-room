@@ -41,6 +41,7 @@
 
     const mouseDownHandler = (e) => {
       if(e.target === el) {
+        e.preventDefault();
         beingDragged = true;
         
         el.style.transition = replaceTransition(el.style.transition, "left");
@@ -71,7 +72,7 @@
     };
     const mouseMoveHandler = (e) => {
       if(beingDragged) {
-
+        e.preventDefault();
         let newX, newY;
 
         if(e.type === 'touchstart') {
@@ -107,6 +108,7 @@
     };
     const mouseUpHandler = (e) => {
       if(beingDragged) {
+        e.preventDefault();
         beingDragged = false;
 
         if(mouseUpCallback) {
@@ -123,8 +125,8 @@
     container.addEventListener('mouseup', mouseUpHandler);
 
     container.addEventListener("touchstart", mouseDownHandler, false);
-    container.addEventListener("touchend", mouseMoveHandler, false);
-    container.addEventListener("touchmove", mouseUpHandler, false);
+    container.addEventListener("touchmove", mouseMoveHandler, false);
+    container.addEventListener("touchend", mouseUpHandler, false);
 
     return () => {  // Remove draggable status from element
       container.removeEventListener('mousedown', mouseDownHandler);
@@ -132,8 +134,8 @@
       container.removeEventListener('mouseup', mouseUpHandler);
 
       container.removeEventListener("touchstart", mouseDownHandler);
-      container.removeEventListener("touchend", mouseMoveHandler);
-      container.removeEventListener("touchmove", mouseUpHandler);
+      container.removeEventListener("touchmove", mouseMoveHandler);
+      container.removeEventListener("touchend", mouseUpHandler);
     };
   }
 

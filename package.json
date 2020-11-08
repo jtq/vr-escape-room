@@ -1,5 +1,5 @@
 {
-  "name": "novikov-timeline",
+  "name": "shared-server-state",
   "version": "1.0.0",
   "description": "Manage consistent timelines of world-sate changes between server and clients (actions are constant, but may have multiple initiators)",
   "main": "index.js",
