@@ -26,6 +26,9 @@ app.get('/', (req, res) => {
 app.get('/objects', (req, res) => {
   res.render('objects');
 });
+app.get('/scene', (req, res) => {
+  res.render('scene');
+});
 
 /*const server = app.listen(process.env.PORT || 3000, () => {
   console.log("server is running");
