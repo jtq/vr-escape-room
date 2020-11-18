@@ -1,15 +1,14 @@
+
+// Interactable component - responds to hover and click
 AFRAME.registerComponent('interactable', {
-  schema: {},
   init: function () {
     // Set up initial state and variables.
-
-    //this.el.classList.add('interactable');
 
     // Intersection
     this.onIntersection = AFRAME.utils.bind(e => {
       e.preventDefault();
       e.stopPropagation();
-      this.el.setAttribute('material', 'color', '#f88');
+      this.el.setAttribute('halo', {});
     }, this);
     // Attach event listener.
     this.el.addEventListener('raycaster-intersected', this.onIntersection);
@@ -18,7 +17,7 @@ AFRAME.registerComponent('interactable', {
     this.onDeintersection = AFRAME.utils.bind(e => {
       e.preventDefault();
       e.stopPropagation();
-      this.el.setAttribute('material', 'color', '#fff');
+      this.el.removeAttribute('halo');
     }, this);
     // Attach event listener.
     this.el.addEventListener('raycaster-intersected-cleared', this.onDeintersection);
@@ -28,6 +27,29 @@ AFRAME.registerComponent('interactable', {
   remove: function () {},
   pause: function () {},
   play: function () {}
+});
+
+// Show object ina highlighted state
+AFRAME.registerComponent('halo', {
+  schema: {
+    highlight: {type: 'color', default: '#00BF00'}
+  },
+  init: function () {
+    this.el.object3D.traverse(obj => {
+      if(obj instanceof THREE.Mesh && obj.material) {
+        obj.userData.originalEmissive = obj.material.emissive.getHex();
+        obj.material.emissive.set(this.data.highlight);
+      }
+    });
+  },
+  remove: function () {
+    this.el.object3D.traverse(obj => {
+      if(obj.userData.originalEmissive || obj.userData.originalEmissive === 0) {
+        obj.material.emissive.setHex(obj.userData.originalEmissive);
+        delete(obj.userData.originalEmissive);
+      }
+    });
+  },
 });
 
 AFRAME.registerComponent('openable-drawer', {
@@ -40,8 +62,10 @@ AFRAME.registerComponent('openable-drawer', {
 
 AFRAME.registerComponent('selectable-goal', {
   init: function () {
-    this.el.addEventListener('click', function (evt) {
+    this.el.addEventListener('click', function (e) {
       alert('You found the Rubics Cube!');
+      e.preventDefault();
+      e.stopPropagation();
     });
   }
 });

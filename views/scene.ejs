@@ -52,11 +52,13 @@ function move(el, dir) {
 
       <a-entity position="0 0 0"></a-entity>
         <a-camera position="0 2 0" look-controls wasd-controls>
-          <a-entity cursor2="fuse: false; mouseCursorStylesEnabled: true; rayOrigin:entity" position="0 0 -1" scale="1 1 1"
-            geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: cyan; shader: flat"
-            animation__enter="startEvents:mouseenter; property:scale; from:1 1 1; to:0.2 0.2 0.2; dur:500;"
-            animation__leave="startEvents:mouseleave; property:scale; to:1 1 1; dur:100;"
-            raycaster2="maxObjects: 1; uniqueElements: true; far: 20; interval: 1000; objects: [interactable]"
+          <a-entity cursor2="fuse: false; mouseCursorStylesEnabled: true; rayOrigin:entity" position="0 0 -0.1" scale="1 1 1"
+            geometry="primitive: ring; radiusInner: 0.002; radiusOuter: 0.003" material="color: #ff0000; shader: flat"
+            animation__enterSize="startEvents:mouseenter; property:scale; from:1 1 1; to:0.2 0.2 0.2; dur:500;"
+            animation__enterColour="startEvents:mouseenter; property:material.color; to:#0088ff; dur:500;"
+            animation__leaveSize="startEvents:mouseleave; property:scale; to:1 1 1; dur:100;"
+            animation__leaveColour="startEvents:mouseleave; property:material.color; to:#ff0000; dur:100;"
+            raycaster2="maxObjects: 1; uniqueElements: true; far: 20; interval: 0; objects: [interactable]"
           >
           </a-entity>
         </a-camera>
