@@ -9,10 +9,10 @@
     <script>
 
 function move(el, dir) {
-  const speed = 0.01;
+  const speed = 1;
   let pos = el.object3D.position;
-  if(dir > 0 && pos.z < 0.4) {
-    pos.z = Math.min(0.4, pos.z+speed);
+  if(dir > 0 && pos.z < 40) {
+    pos.z = Math.min(40, pos.z+speed);
     requestAnimationFrame(move.bind(null, el, dir));
   }
   else if(dir < 0 && pos.z > 0) {
@@ -32,14 +32,13 @@ function move(el, dir) {
         <a-asset-item id="chestofdrawers-drawer-obj" src="models/chestofdrawers-drawer.obj"></a-asset-item>
       </a-assets>
 
-      <a-entity shadow="receive: false; cast: true;" position="0 0.6 -1.5"><!-- chest of drawers group -->
-        <a-entity obj-model="obj: #chestofdrawers-obj;" scale="0.01 0.01 0.01" rotation="90 -90 0" position="0.71 0.35 0.25"  material="src: #wood-1; repeat: 0.1 0.5"></a-entity>
-        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" openable-drawer scale="0.01 0.01 0.01" rotation="-90 0 0" position="0 0 0" material="src: #wood-1;"></a-entity>
-        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" openable-drawer scale="0.01 0.01 0.01" rotation="-90 0 0" position="0 -0.24 0" material="src: #wood-1;"></a-entity>
-        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" shadow="receive: true; cast: false;" openable-drawer scale="0.01 0.01 0.01" rotation="-90 0 0" position="0 -0.48 0" material="src: #wood-1;">
-          <a-box interactable src="#rubicscube" selectable-goal width="10" depth="10" height="10" position="0 0 34" rotation="0 0 13"></a-box>
+      <a-entity obj-model="obj: #chestofdrawers-obj;" scale="0.01 0.01 0.01" material="src: #wood-1; repeat: 0.05 0.1;" shadow="receive: false; cast: true;" position="0 0 -1.5"><!-- chest of drawers group -->
+        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" openable-drawer rotation="0 0 0" position="0 76 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0 0;"></a-entity>
+        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" openable-drawer rotation="0 0 0" position="0 52 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.1 0.2;"></a-entity>
+        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" shadow="receive: true; cast: false;" openable-drawer rotation="0 0 0" position="0 28 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.3 0.5;">
+          <a-box interactable src="#rubicscube" selectable-goal width="10" depth="10" height="10" position="0 7 0" rotation="0 13 0"></a-box>
         </a-entity>
-        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" openable-drawer scale="0.01 0.01 0.01" rotation="-90 0 0" position="0 -0.72 0" material="src: #wood-1;"></a-entity>
+        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" openable-drawer rotation="0 0 0" position="0 4 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.7 0.6;"></a-entity>
       </a-entity>
 
       <a-plane shadow="receive: true; cast: false;" position="0 0 0" rotation="-90 0 0" width="6" height="8" color="#7BC8A4"></a-plane>
@@ -51,7 +50,7 @@ function move(el, dir) {
       </a-entity>
 
       <a-entity position="0 0 0"></a-entity>
-        <a-camera position="0 2 0" look-controls wasd-controls>
+        <a-camera position="0 1.6 0" look-controls wasd-controls>
           <a-entity cursor2="fuse: false; mouseCursorStylesEnabled: true; rayOrigin:entity" position="0 0 -0.1" scale="1 1 1"
             geometry="primitive: ring; radiusInner: 0.002; radiusOuter: 0.003" material="color: #ff0000; shader: flat"
             animation__enterSize="startEvents:mouseenter; property:scale; from:1 1 1; to:0.2 0.2 0.2; dur:500;"
