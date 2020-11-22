@@ -39,6 +39,8 @@ AFRAME.registerComponent('halo', {
       if(obj.material && typeof obj.material.originalEmissive === 'undefined') {
         obj.material.originalEmissive = obj.material.emissive.getHex();
         obj.material.emissive.set(this.data.highlight);
+        obj.material.originalEmissiveIntensity = obj.material.emissiveIntensity;
+        obj.material.emissiveIntensity = 0.5;
       }
     });
   },
@@ -46,17 +48,66 @@ AFRAME.registerComponent('halo', {
     this.el.object3D.traverse(obj => {
       if(obj.material && (typeof obj.material.originalEmissive !== 'undefined')) {
         obj.material.emissive.setHex(obj.material.originalEmissive);
+        obj.material.emissiveIntensity = obj.material.originalEmissiveIntensity;
         delete(obj.material.originalEmissive);
+        delete(obj.material.originalEmissiveIntensity);
       }
     });
   },
 });
 
-AFRAME.registerComponent('openable-drawer', {
+AFRAME.registerComponent('respond-interaction', {
+  dependencies: ['animation'],
+  schema: {
+    interacted: {type: 'boolean', default: false},
+    reversible: {type: 'boolean', default: true},
+    translateVector: {type: 'vec3', default: {x: 0, y: 0, z: 1}},
+    translateDuration: {type: 'int', default: 500},
+  },
   init: function () {
-    this.el.addEventListener('click', function (evt) {
-      move(this, this.object3D.position.z > 0 ? -1: 1);
-    });
+
+    this.originalPosition = { ...this.el.components.position.attrValue };
+
+    this.el.addEventListener('click', AFRAME.utils.bind(e => {
+
+      if(!this.data.interacted) {
+        const origPos = this.originalPosition;
+        const curPos = this.el.getAttribute('position');
+        const diffPos = this.data.translateVector;
+        const destPos = {
+          x: origPos.x+diffPos.x,
+          y: origPos.y+diffPos.y,
+          z: origPos.z+diffPos.z
+        };
+        //console.log(curPos, '->', destPos, this);
+        this.el.setAttribute('animation', {
+          property: 'position',
+          from: curPos.x + ' ' + curPos.y + ' ' + curPos.z,
+          to: destPos.x + ' ' + destPos.y + ' ' + destPos.z,
+          dur: this.data.translateDuration,
+          easing: 'linear',
+          autoplay: true
+        });
+        this.data.interacted = true;
+      }
+      else if(this.data.reversible) { // Already interacted, but reversible
+        const origPos = this.originalPosition;
+        const curPos = this.el.getAttribute('position');
+        //console.log(curPos, '->', origPos, this);
+        this.el.setAttribute('animation', {
+          property: 'position',
+          from: curPos.x + ' ' + curPos.y + ' ' + curPos.z,
+          to: origPos.x + ' ' + origPos.y + ' ' + origPos.z,
+          dur: this.data.translateDuration,
+          easing: 'linear',
+          autoplay: true
+        });
+        this.data.interacted = false;
+      }
+    }));
+
+    // this.el.addEventListener('click', function (evt) {
+    // });
   }
 });
 
