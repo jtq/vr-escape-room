@@ -61,48 +61,31 @@ AFRAME.registerComponent('respond-interaction', {
   schema: {
     interacted: {type: 'boolean', default: false},
     reversible: {type: 'boolean', default: true},
-    translateVector: {type: 'vec3', default: {x: 0, y: 0, z: 1}},
-    translateDuration: {type: 'int', default: 500},
+    positionOffset: {type: 'vec3', default: {x: 0, y: 0, z: 0}},
+    positionDuration: {type: 'int', default: 500},
+    rotationOffset: {type: 'vec3', default: {x: 0, y: 0, z: 0}},
+    rotationDuration: {type: 'int', default: 500},
   },
   init: function () {
-
-    this.originalPosition = { ...this.el.components.position.attrValue };
 
     this.el.addEventListener('click', AFRAME.utils.bind(e => {
 
       if(!this.data.interacted) {
-        const origPos = this.originalPosition;
-        const curPos = this.el.getAttribute('position');
-        const diffPos = this.data.translateVector;
-        const destPos = {
-          x: origPos.x+diffPos.x,
-          y: origPos.y+diffPos.y,
-          z: origPos.z+diffPos.z
-        };
-        //console.log(curPos, '->', destPos, this);
-        this.el.setAttribute('animation', {
-          property: 'position',
-          from: curPos.x + ' ' + curPos.y + ' ' + curPos.z,
-          to: destPos.x + ' ' + destPos.y + ' ' + destPos.z,
-          dur: this.data.translateDuration,
-          easing: 'linear',
-          autoplay: true
+        ['position', 'rotation'].forEach(componentName => {
+          const anim = generateVectorAnimation(this, componentName);
+          if(anim) {
+            this.el.setAttribute('animation__interaction-'+componentName, anim);
+            this.data.interacted = true;
+          }
         });
-        this.data.interacted = true;
       }
       else if(this.data.reversible) { // Already interacted, but reversible
-        const origPos = this.originalPosition;
-        const curPos = this.el.getAttribute('position');
-        //console.log(curPos, '->', origPos, this);
-        this.el.setAttribute('animation', {
-          property: 'position',
-          from: curPos.x + ' ' + curPos.y + ' ' + curPos.z,
-          to: origPos.x + ' ' + origPos.y + ' ' + origPos.z,
-          dur: this.data.translateDuration,
-          easing: 'linear',
-          autoplay: true
+        ['position', 'rotation'].forEach(componentName => {
+          if(this.attrValue[componentName+'Offset']) {
+            this.el.setAttribute('animation__interaction-'+componentName, 'dir', 'reverse');
+            this.data.interacted = false;
+          }
         });
-        this.data.interacted = false;
       }
     }));
 
@@ -110,6 +93,34 @@ AFRAME.registerComponent('respond-interaction', {
     // });
   }
 });
+
+function generateVectorAnimation(thisComponent, componentName, easing='linear') {
+  if(!thisComponent.el.components[componentName]) {
+    thisComponent.el.setAttribute(componentName, {x:0, y:0, z:0});
+  }
+  if(thisComponent.attrValue[componentName+'Offset']) {
+    const origPos = thisComponent.el.components[componentName].data;
+    const curPos = thisComponent.el.getAttribute(componentName);
+    const diffPos = thisComponent.data[componentName+'Offset'];
+    const destPos = {
+      x: origPos.x+diffPos.x,
+      y: origPos.y+diffPos.y,
+      z: origPos.z+diffPos.z
+    };
+    return {
+      property: componentName,
+      from: curPos.x + ' ' + curPos.y + ' ' + curPos.z,
+      to: destPos.x + ' ' + destPos.y + ' ' + destPos.z,
+      dur: thisComponent.data[componentName+'Duration'],
+      easing,
+      autoplay: true,
+      dir: 'normal'
+    }
+  }
+  else {
+    return null;
+  }
+}
 
 AFRAME.registerComponent('selectable-goal', {
   init: function () {

@@ -8,22 +8,25 @@
     <script src="/js/components/core-modified/cursor2.js"></script>
   </head>
   <body>
-    <a-scene shadow="type: pcfsoft; autoUpdate: true;">
+    <a-scene debug shadow="type: pcfsoft; autoUpdate: true;">
       <a-assets>
         <img id="wood-1" src="images/textures/wood-1-256.jpg">
         <img id="rubicscube" src="images/textures/rubicscube.png">
+        <img id="note" src="images/textures/note-a4-600x900.jpg">
 
         <a-asset-item id="chestofdrawers-obj" src="models/chestofdrawers.obj"></a-asset-item>
         <a-asset-item id="chestofdrawers-drawer-obj" src="models/chestofdrawers-drawer.obj"></a-asset-item>
       </a-assets>
 
       <a-entity obj-model="obj: #chestofdrawers-obj;" scale="0.01 0.01 0.01" material="src: #wood-1; repeat: 0.05 0.1;" shadow="receive: false; cast: true;" position="0 0 -1.5"><!-- chest of drawers group -->
-        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" respond-interaction="translateVector:0 0 40;" rotation="0 0 0" position="0 76 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0 0;"></a-entity>
-        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" respond-interaction="translateVector:0 0 40;" rotation="0 0 0" position="0 52 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.1 0.2;"></a-entity>
-        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" respond-interaction="translateVector:0 0 40;" shadow="receive: true; cast: false;" rotation="0 0 0" position="0 28 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.3 0.5;">
+        <a-box interactable respond-interaction="rotationOffset:70 0 0; positionOffset:0 50 130;" width="20" depth="30" height="1" position="0 102 0" material="src:#note"></a-box>
+
+        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" respond-interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 76 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0 0;"></a-entity>
+        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" respond-interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 52 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.1 0.2;"></a-entity>
+        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" respond-interaction="positionOffset:0 0 40;" shadow="receive: true; cast: false;" rotation="0 0 0" position="0 28 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.3 0.5;">
           <a-box interactable src="#rubicscube" selectable-goal width="10" depth="10" height="10" position="0 7 0" rotation="0 13 0"></a-box>
         </a-entity>
-        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" respond-interaction="translateVector:0 0 40;" rotation="0 0 0" position="0 4 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.7 0.6;"></a-entity>
+        <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" respond-interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 4 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.7 0.6;"></a-entity>
       </a-entity>
 
       <a-plane shadow="receive: true; cast: false;" position="0 0 0" rotation="-90 0 0" width="6" height="8" color="#7BC8A4"></a-plane>
