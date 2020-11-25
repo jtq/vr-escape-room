@@ -32,7 +32,7 @@ AFRAME.registerComponent('interactable', {
 // Show object ina highlighted state
 AFRAME.registerComponent('halo', {
   schema: {
-    highlight: {type: 'color', default: '#00BF00'}
+    highlight: {type: 'color', default: '#606060'}
   },
   init: function () {
     this.el.object3D.traverse(obj => {
@@ -61,6 +61,7 @@ AFRAME.registerComponent('respond-interaction', {
   schema: {
     interacted: {type: 'boolean', default: false},
     reversible: {type: 'boolean', default: true},
+    easing: {type:'string', default:'linear'},
     positionOffset: {type: 'vec3', default: {x: 0, y: 0, z: 0}},
     positionDuration: {type: 'int', default: 500},
     rotationOffset: {type: 'vec3', default: {x: 0, y: 0, z: 0}},
@@ -68,21 +69,56 @@ AFRAME.registerComponent('respond-interaction', {
   },
   init: function () {
 
+    ['position', 'rotation'].forEach(componentName => {
+      // If component to animate doesn't exist, add it.
+       if(!this.el.getAttribute(componentName)) {
+        this.el.setAttribute(componentName, {});
+      }
+      // If we don't already have an origin to animate from, add it
+      this.originalValues = this.originalValues || {};
+      if(!this.originalValues[componentName]) {
+        this.originalValues[componentName] = { ...this.el.getAttribute(componentName) }; // Ensure it's a proper vector and not just a POJO
+      }
+    });
+
     this.el.addEventListener('click', AFRAME.utils.bind(e => {
 
       if(!this.data.interacted) {
         ['position', 'rotation'].forEach(componentName => {
-          const anim = generateVectorAnimation(this, componentName);
-          if(anim) {
-            this.el.setAttribute('animation__interaction-'+componentName, anim);
+          if(this.attrValue[componentName+'Offset']) {
+            const origPos = this.originalValues[componentName];
+            const diffPos = this.data[componentName+'Offset'];
+            const destPos = {
+              x: origPos.x+diffPos.x,
+              y: origPos.y+diffPos.y,
+              z: origPos.z+diffPos.z
+            };
+            const anim = {
+              property: componentName,
+              to: destPos.x + ' ' + destPos.y + ' ' + destPos.z,
+              dur: this.data[componentName+'Duration'],
+              easing: this.data.easing,
+              autoplay: true
+            };
+            this.el.removeAttribute('animation__interaction-'+componentName+'-backward');
+            this.el.setAttribute('animation__interaction-'+componentName+'-forward', anim);
             this.data.interacted = true;
           }
         });
       }
-      else if(this.data.reversible) { // Already interacted, but reversible
+      else if(this.data.reversible) { // Already interacted-with, but reversible
         ['position', 'rotation'].forEach(componentName => {
           if(this.attrValue[componentName+'Offset']) {
-            this.el.setAttribute('animation__interaction-'+componentName, 'dir', 'reverse');
+            const origPos = this.originalValues[componentName];
+            const anim = {
+              property: componentName,
+              to: origPos.x + ' ' + origPos.y + ' ' + origPos.z,
+              dur: this.data[componentName+'Duration'],
+              easing: this.data.easing,
+              autoplay: true
+            };
+            this.el.removeAttribute('animation__interaction-'+componentName+'-forward');
+            this.el.setAttribute('animation__interaction-'+componentName+'-backward', anim);
             this.data.interacted = false;
           }
         });
@@ -93,34 +129,6 @@ AFRAME.registerComponent('respond-interaction', {
     // });
   }
 });
-
-function generateVectorAnimation(thisComponent, componentName, easing='linear') {
-  if(!thisComponent.el.components[componentName]) {
-    thisComponent.el.setAttribute(componentName, {x:0, y:0, z:0});
-  }
-  if(thisComponent.attrValue[componentName+'Offset']) {
-    const origPos = thisComponent.el.components[componentName].data;
-    const curPos = thisComponent.el.getAttribute(componentName);
-    const diffPos = thisComponent.data[componentName+'Offset'];
-    const destPos = {
-      x: origPos.x+diffPos.x,
-      y: origPos.y+diffPos.y,
-      z: origPos.z+diffPos.z
-    };
-    return {
-      property: componentName,
-      from: curPos.x + ' ' + curPos.y + ' ' + curPos.z,
-      to: destPos.x + ' ' + destPos.y + ' ' + destPos.z,
-      dur: thisComponent.data[componentName+'Duration'],
-      easing,
-      autoplay: true,
-      dir: 'normal'
-    }
-  }
-  else {
-    return null;
-  }
-}
 
 AFRAME.registerComponent('selectable-goal', {
   init: function () {

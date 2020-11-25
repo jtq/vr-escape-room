@@ -19,7 +19,7 @@
       </a-assets>
 
       <a-entity obj-model="obj: #chestofdrawers-obj;" scale="0.01 0.01 0.01" material="src: #wood-1; repeat: 0.05 0.1;" shadow="receive: false; cast: true;" position="0 0 -1.5"><!-- chest of drawers group -->
-        <a-box interactable respond-interaction="rotationOffset:70 0 0; positionOffset:0 50 130;" width="20" depth="30" height="1" position="0 102 0" material="src:#note"></a-box>
+        <a-box interactable respond-interaction="rotationOffset:70 0 0; positionOffset:0 50 125; easing:easeOutCirc;" width="20" depth="30" height="1" position="0 102 0" material="src:#note"></a-box>
 
         <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" respond-interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 76 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0 0;"></a-entity>
         <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" respond-interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 52 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.1 0.2;"></a-entity>
@@ -42,7 +42,7 @@
           <a-entity cursor2="fuse: false; mouseCursorStylesEnabled: true; rayOrigin:entity" position="0 0 -0.1" scale="1 1 1"
             geometry="primitive: ring; radiusInner: 0.002; radiusOuter: 0.003" material="color: #ff0000; shader: flat"
             animation__enterSize="startEvents:mouseenter; property:scale; from:1 1 1; to:0.2 0.2 0.2; dur:500;"
-            animation__enterColour="startEvents:mouseenter; property:material.color; to:#0088ff; dur:500;"
+            animation__enterColour="startEvents:mouseenter; property:material.color; to:#0088ff; dur:0;"
             animation__leaveSize="startEvents:mouseleave; property:scale; to:1 1 1; dur:100;"
             animation__leaveColour="startEvents:mouseleave; property:material.color; to:#ff0000; dur:100;"
             raycaster2="maxObjects: 1; uniqueElements: true; far: 20; interval: 0; objects: [interactable]"
