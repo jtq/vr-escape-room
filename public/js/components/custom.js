@@ -56,7 +56,7 @@ AFRAME.registerComponent('halo', {
   },
 });
 
-AFRAME.registerComponent('respond-interaction', {
+AFRAME.registerComponent('interaction', {
   dependencies: ['animation'],
   schema: {
     interacted: {type: 'boolean', default: false},
@@ -68,6 +68,48 @@ AFRAME.registerComponent('respond-interaction', {
     rotationDuration: {type: 'int', default: 500},
   },
   init: function () {
+
+    this.interact = AFRAME.utils.bind(() => {
+      ['position', 'rotation'].forEach(componentName => {
+        if(this.attrValue[componentName+'Offset']) {
+          const origPos = this.originalValues[componentName];
+          const diffPos = this.data[componentName+'Offset'];
+          const destPos = {
+            x: origPos.x+diffPos.x,
+            y: origPos.y+diffPos.y,
+            z: origPos.z+diffPos.z
+          };
+          const anim = {
+            property: componentName,
+            to: destPos.x + ' ' + destPos.y + ' ' + destPos.z,
+            dur: this.data[componentName+'Duration'],
+            easing: this.data.easing,
+            autoplay: true
+          };
+          this.el.removeAttribute('animation__interaction-'+componentName+'-backward');
+          this.el.setAttribute('animation__interaction-'+componentName+'-forward', anim);
+          this.data.interacted = true;
+        }
+      });
+    });
+
+    this.uninteract = AFRAME.utils.bind(() => {
+      ['position', 'rotation'].forEach(componentName => {
+        if(this.attrValue[componentName+'Offset']) {
+          const origPos = this.originalValues[componentName];
+          const anim = {
+            property: componentName,
+            to: origPos.x + ' ' + origPos.y + ' ' + origPos.z,
+            dur: this.data[componentName+'Duration'],
+            easing: this.data.easing,
+            autoplay: true
+          };
+          this.el.removeAttribute('animation__interaction-'+componentName+'-forward');
+          this.el.setAttribute('animation__interaction-'+componentName+'-backward', anim);
+          this.data.interacted = false;
+        }
+      });
+    });
 
     ['position', 'rotation'].forEach(componentName => {
       // If component to animate doesn't exist, add it.
@@ -82,51 +124,23 @@ AFRAME.registerComponent('respond-interaction', {
     });
 
     this.el.addEventListener('click', AFRAME.utils.bind(e => {
-
       if(!this.data.interacted) {
-        ['position', 'rotation'].forEach(componentName => {
-          if(this.attrValue[componentName+'Offset']) {
-            const origPos = this.originalValues[componentName];
-            const diffPos = this.data[componentName+'Offset'];
-            const destPos = {
-              x: origPos.x+diffPos.x,
-              y: origPos.y+diffPos.y,
-              z: origPos.z+diffPos.z
-            };
-            const anim = {
-              property: componentName,
-              to: destPos.x + ' ' + destPos.y + ' ' + destPos.z,
-              dur: this.data[componentName+'Duration'],
-              easing: this.data.easing,
-              autoplay: true
-            };
-            this.el.removeAttribute('animation__interaction-'+componentName+'-backward');
-            this.el.setAttribute('animation__interaction-'+componentName+'-forward', anim);
-            this.data.interacted = true;
-          }
-        });
+        this.interact();
       }
       else if(this.data.reversible) { // Already interacted-with, but reversible
-        ['position', 'rotation'].forEach(componentName => {
-          if(this.attrValue[componentName+'Offset']) {
-            const origPos = this.originalValues[componentName];
-            const anim = {
-              property: componentName,
-              to: origPos.x + ' ' + origPos.y + ' ' + origPos.z,
-              dur: this.data[componentName+'Duration'],
-              easing: this.data.easing,
-              autoplay: true
-            };
-            this.el.removeAttribute('animation__interaction-'+componentName+'-forward');
-            this.el.setAttribute('animation__interaction-'+componentName+'-backward', anim);
-            this.data.interacted = false;
-          }
-        });
+        this.uninteract();
       }
     }));
-
-    // this.el.addEventListener('click', function (evt) {
-    // });
+  },
+  update: function(oldData) {
+    if(oldData.interacted !== this.data.interacted) {
+      if(this.data.interacted) {
+        this.interact();
+      }
+      else {
+        this.uninteract();
+      }
+    }
   }
 });
 
