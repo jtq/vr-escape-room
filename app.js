@@ -4,9 +4,8 @@ const socketio = require('socket.io');
 // Needed for HTTPS localdev
 var https = require('https');
 const fs = require('fs');
-const port = 3000;
+const port = 8001;
 
-console.log(__dirname);
 var key = fs.readFileSync(__dirname + '/../certs/selfsigned.key');
 var cert = fs.readFileSync(__dirname + '/../certs/selfsigned.crt');
 var options = {
@@ -30,14 +29,9 @@ app.get('/scene', (req, res) => {
   res.render('scene');
 });
 
-/*const server = app.listen(process.env.PORT || 3000, () => {
-  console.log("server is running");
-});*/
-
 var server = https.createServer(options, app);
-
-server.listen(8001, function() {
-    console.log("server running at https://IP_ADDRESS:8001/")
+server.listen(port, function() {
+    console.log(`https server running on port ${port}`)
 });
 
 //initialize socket for the server

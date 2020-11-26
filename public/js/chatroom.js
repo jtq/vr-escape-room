@@ -1,4 +1,3 @@
-(function connect() {
 
   const user = {
     name: getRandomUsername(),
@@ -175,7 +174,7 @@
   });
 
   // Socket
-  let socket = io.connect(':3000'); // Listen on same protocol+domain, port 3000
+  let socket = io.connect(); // Listen on same protocol+domain+port
 
   socket.on('connect', () => {
     console.log('connected:');
@@ -207,7 +206,7 @@
     document.querySelector("#boxPosition").value = newState.scene.ids.box1.left.match(/\d+/)[0];
   });
 
-})();
+
 
 
 
