@@ -67,7 +67,19 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
-  <script src="/js/chatroom.js"></script>
+  <script src="/js/server-sync.js"></script>
+  <script src="/js/test-ui.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      document.querySelector('#userName').textContent = user.name;
+      document.querySelector('#userColour').style.backgroundColor = user.colour;
+
+      socket.on('sync_state', newState => {
+        document.querySelector("#boxPosition").value = newState.scene.ids.box1.left.match(/\d+/)[0];
+      });
+    });
+
+  </script>
 </body>
 
 </html>
