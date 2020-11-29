@@ -1,19 +1,6 @@
 const express = require('express');
 const socketio = require('socket.io');
 
-// Needed for HTTPS localdev
-var https = require('https');
-const fs = require('fs');
-const port = process.env.PORT || 8001;
-
-var key = fs.readFileSync(__dirname + '/../certs/selfsigned.key');
-var cert = fs.readFileSync(__dirname + '/../certs/selfsigned.crt');
-var options = {
-  key: key,
-  cert: cert
-};
-// End HTTPS localdev
-
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -29,10 +16,37 @@ app.get('/', (req, res) => {
   res.render('scene');
 });
 
-var server = https.createServer(options, app);
-server.listen(port, function() {
-    console.log(`https server running on port ${port}`)
-});
+const port = process.env.PORT || 8001;
+let server;
+
+try {
+  // Needed for HTTPS localdev
+  var https = require('https');
+  const fs = require('fs');
+
+  var key = fs.readFileSync(__dirname + '/../certs/selfsigned.key');
+  var cert = fs.readFileSync(__dirname + '/../certs/selfsigned.crt');
+  var options = {
+    key: key,
+    cert: cert
+  };
+  // End HTTPS localdev
+  server = https.createServer(options, app);
+  server.listen(port, function() {
+      console.log(`https server running on port ${port}`)
+  });
+}
+catch(e) {
+  console.log("HTTPS startup error", e);
+
+  var http = require('http');
+
+  server = http.createServer(app);
+  server.listen(port, function() {
+      console.log(`http server running on port ${port}`)
+  });
+
+}
 
 //initialize socket for the server
 const io = socketio(server);
