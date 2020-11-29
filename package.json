@@ -2,7 +2,10 @@
   "name": "vr-escape-room",
   "version": "1.0.0",
   "description": "Manage consistent timelines of world-sate changes between server and clients (actions are constant, but may have multiple initiators)",
-  "main": "index.js",
+  "main": "app.js",
+  "engines": {
+    "node": "14.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app.js"

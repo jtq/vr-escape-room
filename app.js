@@ -4,7 +4,7 @@ const socketio = require('socket.io');
 // Needed for HTTPS localdev
 var https = require('https');
 const fs = require('fs');
-const port = 8001;
+const port = process.env.PORT || 8001;
 
 var key = fs.readFileSync(__dirname + '/../certs/selfsigned.key');
 var cert = fs.readFileSync(__dirname + '/../certs/selfsigned.crt');
@@ -19,13 +19,13 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
-app.get('/', (req, res) => {
+app.get('/sync-test', (req, res) => {
   res.render('index');
 });
 app.get('/objects', (req, res) => {
   res.render('objects');
 });
-app.get('/scene', (req, res) => {
+app.get('/', (req, res) => {
   res.render('scene');
 });
 
@@ -41,9 +41,9 @@ let state = {
   users: {},
   scene: {
     ids: {
-      box1: {
-        left: "100px"
-      }
+      // box1: {
+      //   left: "100px"
+      // }
     }
   }
 };
