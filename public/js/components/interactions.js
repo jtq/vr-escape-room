@@ -120,7 +120,7 @@ AFRAME.registerComponent('interaction', {
 AFRAME.registerComponent('selectable-goal', {
   init: function () {
     this.el.addEventListener('click', function (e) {
-      alert('You found the Rubics Cube!');
+      alert('You found the Rubiks Cube!');
       e.preventDefault();
       e.stopPropagation();
     });

@@ -13,12 +13,11 @@
 
       .init-box {
         position: absolute;
-        width: 50%;
-        height: 50%;
-        left: 50%;
-        top: 50%;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
         background-color: #ffffff;
-        transform: translate(-50%, -50%);
         border-radius: 20px;
       }
 
@@ -38,7 +37,7 @@
     <a-scene debug shadow="type: pcfsoft; autoUpdate: true;">
       <a-assets>
         <img id="wood-1" src="images/textures/wood-1-256.jpg">
-        <img id="rubicscube" src="images/textures/rubicscube.png">
+        <img id="rubikscube" src="images/textures/rubikscube.png">
         <img id="note" src="images/textures/note-a4-600x900.jpg">
 
         <a-asset-item id="chestofdrawers-obj" src="models/chestofdrawers.obj"></a-asset-item>
@@ -51,7 +50,7 @@
         <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 76 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0 0;"></a-entity>
         <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 52 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.1 0.2;"></a-entity>
         <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 40;" shadow="receive: true; cast: false;" rotation="0 0 0" position="0 28 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.3 0.5;">
-          <a-box interactable src="#rubicscube" selectable-goal width="10" depth="10" height="10" position="0 7 0" rotation="0 13 0"></a-box>
+          <a-box interactable src="#rubikscube" selectable-goal width="10" depth="10" height="10" position="0 7 0" rotation="0 13 0"></a-box>
         </a-entity>
         <a-entity interactable obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 4 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.7 0.6;"></a-entity>
       </a-entity>
@@ -77,7 +76,7 @@
       </a-entity>
     </a-scene>
     <div class="init-box">
-      <button>Go full&#8203;screen</button>
+      <button>Stand up, then tap or click to enter full&#8203;screen</button>
     </div>
     <script>
       window.addEventListener('load', () => {
