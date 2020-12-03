@@ -1,36 +1,83 @@
+const INTERACTION_EVENT = "interact";
+const INTERACTION_COMPONENT = "interaction";
 
-// Interactable component - responds to hover and click
-AFRAME.registerComponent('interactable', {
+// Interactor component - attach to cursor for an occlusion-respecting cursor
+AFRAME.registerComponent('interactor', {
   init: function () {
     // Set up initial state and variables.
+    this.oldIntersectedEls = [];
+    this.selectedEl = null;
+    this.lastClicked = null;
 
-    // Intersection
-    this.onIntersection = AFRAME.utils.bind(e => {
+    this.getNearestIntersectingElement = AFRAME.utils.bind((selectIf, selectFirst) => {
+      const oldEls = this.oldIntersectedEls.map(e=>e.id).toString();
+      const newEls = this.el.components['raycaster'].intersectedEls.map(e=>e.id).toString();
+      if(oldEls === newEls) {
+        return;
+      }
+
+      const uniqueObjsSet = new WeakSet();
+      const uniqueObjsByDistance = [];
+
+      this.oldIntersectedEls.forEach(el => el.removeAttribute('halo'));
+      this.selectedEl = null;
+
+      this.oldIntersectedEls = [ ...this.el.components['raycaster'].intersectedEls];
+
+      this.el.components['raycaster'].intersectedEls.forEach(el => {
+        if(!uniqueObjsSet.has(el)) {
+          uniqueObjsSet.add(el);
+          uniqueObjsByDistance.push(el);
+        }
+      });
+
+      if(uniqueObjsByDistance.length) {
+        if(
+          (!selectIf && !selectFirst) ||
+          (selectIf && uniqueObjsByDistance[0].matches(selectIf))
+        ) {
+          this.selectedEl = uniqueObjsByDistance[0];
+        }
+        else if(selectFirst) {
+          this.selectedEl = uniqueObjsByDistance.find(el => el.matches(selectFirst));
+        }
+
+        if(this.selectedEl) {
+          this.selectedEl.setAttribute('halo', {});
+        }
+      }
+    });
+
+    this.el.addEventListener('click', (e) => {
+      if(this.selectedEl) {
+        this.selectedEl.emit(INTERACTION_EVENT, e);
+        this.lastClicked = this.selectedEl;
+      }
       e.preventDefault();
       e.stopPropagation();
-      this.el.setAttribute('halo', {});
-    }, this);
-    // Attach event listener.
-    this.el.addEventListener('raycaster-intersected', this.onIntersection);
-
-    // De-intersection
-    this.onDeintersection = AFRAME.utils.bind(e => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.el.removeAttribute('halo');
-    }, this);
-    // Attach event listener.
-    this.el.addEventListener('raycaster-intersected-cleared', this.onDeintersection);
+    });
   },
   update: function () {},
-  tick: function () {},
+  tick: function (sinceLoad, sinceLastFrame) {
+    this.getNearestIntersectingElement('['+INTERACTION_COMPONENT+']');
+  },
   remove: function () {},
   pause: function () {},
   play: function () {}
 });
 
-AFRAME.registerComponent('interaction', {
+AFRAME.registerComponent(INTERACTION_COMPONENT, {
   dependencies: ['animation'],
+  events: {
+    [INTERACTION_EVENT]: function (e) {  // Don't use fat-arrows, as this is evaluated in the global context and fat-arrow auto-binding will break it
+      if(!this.data.interacted) {
+        this.interact();
+      }
+      else if(this.data.reversible) { // Already interacted-with, but reversible
+        this.uninteract();
+      }
+    }
+  },
   schema: {
     interacted: {type: 'boolean', default: false},
     reversible: {type: 'boolean', default: true},
@@ -59,8 +106,8 @@ AFRAME.registerComponent('interaction', {
             easing: this.data.easing,
             autoplay: true
           };
-          this.el.removeAttribute('animation__interaction-'+componentName+'-backward');
-          this.el.setAttribute('animation__interaction-'+componentName+'-forward', anim);
+          this.el.removeAttribute('animation__'+INTERACTION_COMPONENT+'-'+componentName+'-backward');
+          this.el.setAttribute('animation__'+INTERACTION_COMPONENT+'-'+componentName+'-forward', anim);
           this.data.interacted = true;
         }
       });
@@ -77,8 +124,8 @@ AFRAME.registerComponent('interaction', {
             easing: this.data.easing,
             autoplay: true
           };
-          this.el.removeAttribute('animation__interaction-'+componentName+'-forward');
-          this.el.setAttribute('animation__interaction-'+componentName+'-backward', anim);
+          this.el.removeAttribute('animation__'+INTERACTION_COMPONENT+'-'+componentName+'-forward');
+          this.el.setAttribute('animation__'+INTERACTION_COMPONENT+'-'+componentName+'-backward', anim);
           this.data.interacted = false;
         }
       });
@@ -95,15 +142,6 @@ AFRAME.registerComponent('interaction', {
         this.originalValues[componentName] = { ...this.el.getAttribute(componentName) }; // Ensure it's a proper vector and not just a POJO
       }
     });
-
-    this.el.addEventListener('click', AFRAME.utils.bind(e => {
-      if(!this.data.interacted) {
-        this.interact();
-      }
-      else if(this.data.reversible) { // Already interacted-with, but reversible
-        this.uninteract();
-      }
-    }));
   },
   update: function(oldData) {
     if(oldData.interacted !== this.data.interacted) {
