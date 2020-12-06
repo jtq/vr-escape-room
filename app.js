@@ -69,14 +69,13 @@ io.on('connection', socket => {
   socket.on('set_user', data => {
     console.log(`set_user: ${socket.user.name} changed settings to ${JSON.stringify(data)}`);
     socket.user = data;
-    state.users = mergeState(state.users, { [data.name]: data });
-
+    state.users = mergeState({}, state.users, { [data.name]: data });
     io.sockets.emit('sync_state', state);
   });
 
   socket.on('update_state', newState => {
     console.log(`update_state: ${JSON.stringify(newState)}`);
-    state = mergeState(state, newState);
+    state = mergeState({}, state, newState);
     io.sockets.emit('sync_state', state);
   });
 
@@ -89,4 +88,17 @@ io.on('connection', socket => {
   });
 });
 
-const mergeState = (state, newState) => ({...state, ...newState});
+const mergeState = (target, ...objs) => {
+  objs.forEach(obj => Object.keys(obj).forEach(k => {
+    if(typeof obj[k] === 'object') {
+      if(typeof target[k] === 'undefined') {
+        target[k] = {};
+      }
+      mergeState(target[k], obj[k]);
+    }
+    else {
+      target[k] = typeof obj[k] !== 'undefined' ? obj[k] : target[k];
+    }
+  }));
+  return target;
+};
