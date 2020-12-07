@@ -9,7 +9,7 @@ AFRAME.registerComponent('interactor', {
     this.selectedEl = null;
     this.lastClicked = null;
 
-    this.getNearestIntersectingElement = AFRAME.utils.bind((selectIf, selectFirst) => {
+    this.getNearestIntersectingElement = (selectIf, selectFirst) => {
       const oldEls = this.oldIntersectedEls.map(e=>e.id).toString();
       const newEls = this.el.components['raycaster'].intersectedEls.map(e=>e.id).toString();
       if(oldEls === newEls) {
@@ -46,7 +46,7 @@ AFRAME.registerComponent('interactor', {
           this.selectedEl.setAttribute('halo', {});
         }
       }
-    });
+    };
 
     this.el.addEventListener('click', (e) => {
       if(this.selectedEl) {
@@ -66,6 +66,108 @@ AFRAME.registerComponent('interactor', {
   play: function () {}
 });
 
+AFRAME.registerSystem(INTERACTION_COMPONENT, {
+  init: function() {
+    this.user = {
+      name: getRandomUsername(),
+      colour: getRandomColour()
+    };
+
+    this.state = {
+      users: {},
+      scene: {
+        ids: {}
+      }
+    };
+
+    this.registerUser = () => {
+      console.log("Current user", this.user);
+      this.socket.emit('set_user', this.user);
+    };
+
+    // Socket
+    this.socket = io.connect(); // Listen on same protocol+domain+port
+
+    this.socket.on('connect', () => {
+      console.log('connected:');
+      this.registerUser();
+    });
+
+    this.socket.on('sync_state', serverState => this.getServerUpdate(serverState));
+
+    this.syncToServer = (id, value) => {
+      this.socket.emit('update_state', {
+        scene: {
+          ids: {
+            [id]: {
+              ...value,
+              lastTouched: this.user.name
+            }
+          }
+        }
+      });
+    };
+
+    this.getServerUpdate = (serverState) => {
+      console.log(`received new state: `, this.state, '->', serverState);
+      Object.entries(serverState.scene.ids).forEach(([id, serverProps]) => {
+        let el = document.querySelector("#"+id);
+        this.state.scene.ids[id] = this.state.scene.ids[id] || {};
+        let ourProps = this.state.scene.ids[id] || {};
+
+        let changed = false;
+        Object.entries(serverProps).forEach(([prop, serverValue]) => {
+          if(ourProps[prop] !== serverValue) {
+            console.log('incoming update:', id, prop, ourProps[prop], '->', serverValue);
+            ourProps[prop] = serverValue;
+            if(prop !== 'lastTouched') {
+              el.setAttribute('interaction', prop, serverValue);
+            }
+            changed = true;
+          }
+        });
+        // if(changed && serverProps.lastTouched) {
+        //   const lastToucher = serverState.users[serverProps.lastTouched];
+        //   if(lastToucher) { // Might not be the case if nobody's touched the state, or the last-toucher has since disconnected
+        //     // Flash in owner colour
+        //   }
+        // }
+      });
+    };
+
+    // Utility functions
+
+    // Generate pronouceable usernames from 3-6 chars with alternating consonantsand vowels.
+    function getRandomUsername() {
+      const vowels = "aeiou";
+      const consonants = "bcdfghjklmnpqrstvwxyz";
+      const name = " ".repeat(randomBetween(3,6)).split("");
+      return name.map((c, i) => {
+        if(i % 2 === 1) {
+          return consonants[randomBetween(0, consonants.length-1)];
+        }
+        else {
+          return vowels[randomBetween(0, vowels.length-1)];
+        }
+      }).join("");
+    }
+
+    function getRandomColour() {
+      return "#" +
+        ("0"+((randomBetween(0, 16) * 16) - 1).toString(16)).substr(-2) +
+        ("0"+((randomBetween(0, 16) * 16) - 1).toString(16)).substr(-2) +
+        ("0"+((randomBetween(0, 16) * 16) - 1).toString(16)).substr(-2);
+    }
+
+    function randomBetween(lowest, highest) {
+      const range = highest - lowest;
+      return Math.ceil(Math.random()*range)+lowest;
+    }
+
+  },
+
+});
+
 AFRAME.registerComponent(INTERACTION_COMPONENT, {
   dependencies: ['animation'],
   events: {
@@ -76,6 +178,8 @@ AFRAME.registerComponent(INTERACTION_COMPONENT, {
       else if(this.data.reversible) { // Already interacted-with, but reversible
         this.uninteract();
       }
+      const uploadVals = { interacted:this.data.interacted };
+      this.system.syncToServer(this.el.id, uploadVals);
     }
   },
   schema: {
@@ -111,7 +215,7 @@ AFRAME.registerComponent(INTERACTION_COMPONENT, {
           this.data.interacted = true;
         }
       });
-    });
+    }, this);
 
     this.uninteract = AFRAME.utils.bind(() => {
       ['position', 'rotation'].forEach(componentName => {
@@ -129,7 +233,7 @@ AFRAME.registerComponent(INTERACTION_COMPONENT, {
           this.data.interacted = false;
         }
       });
-    });
+    }, this);
 
     ['position', 'rotation'].forEach(componentName => {
       // If component to animate doesn't exist, add it.

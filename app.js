@@ -6,14 +6,19 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
-app.get('/sync-test', (req, res) => {
+app.get('/', (req, res) => {
   res.render('index');
+});
+app.get('/admin', (req, res) => {
+  res.render('admin', { state });
+});
+
+
+app.get('/sync-test', (req, res) => {
+  res.render('sync-test');
 });
 app.get('/objects', (req, res) => {
   res.render('objects');
-});
-app.get('/', (req, res) => {
-  res.render('scene');
 });
 
 const port = process.env.PORT || 8001;
@@ -55,12 +60,16 @@ let state = {
   users: {},
   scene: {
     ids: {
-      // box1: {
-      //   left: "100px"
-      // }
     }
   }
 };
+
+const resetSceneMillisecondsAfterLastStateUpdate = 1000*60*10;
+let lastUpdateTimer = null;
+function clearState() {
+  state.scene.ids = {};
+  io.sockets.emit('sync_state', state);
+}
 
 io.on('connection', socket => {
   socket.user = {};
@@ -74,6 +83,10 @@ io.on('connection', socket => {
   });
 
   socket.on('update_state', newState => {
+    if(lastUpdateTimer) {
+      clearTimeout(lastUpdateTimer);
+    }
+    lastUpdateTimer = setTimeout(clearState, resetSceneMillisecondsAfterLastStateUpdate);
     console.log(`update_state: ${JSON.stringify(newState)}`);
     state = mergeState({}, state, newState);
     io.sockets.emit('sync_state', state);
@@ -86,6 +99,8 @@ io.on('connection', socket => {
       io.sockets.emit('sync_state', state);
     }
   });
+
+  io.sockets.emit('sync_state', state); // Send initial world-state on connect
 });
 
 const mergeState = (target, ...objs) => {

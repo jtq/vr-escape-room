@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>State-synchronisation test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <style type="text/css">
+
+.box-container {
+  margin-top: 1rem;
+  outline: 1px solid red;
+  /*border: 1px solid rgba(0,0,0,.125);*/
+  background-color: #f0f0f0;
+  height: 200px;
+  position: relative;
+}
+
+.box {
+  display: block;
+  width: 100px;
+  height: 100px;
+
+  position: absolute;
+
+  transition: left 1s ease, top 1s ease, box-shadow 1s linear;
+
+  background-color: #ff8080;
+}
+
+#box1 {
+  left: 50%;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="title">
+      <h3>State-synchronisation test</h3>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span id="userName"></span>
+        <span id="userColour" class="badge badge-pill">&nbsp;</span>
+      </div>
+      <div class="message-box">
+        <ul class="list-group list-group-flush" id="message-list"></ul>
+        <div class="info"></div>
+      </div>
+
+      <div class="card-footer">
+        <div class="input-group">
+          <label for="formControlRange">Box position</label>
+          <input type="range" class="form-control-range" id="boxPosition">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 10px; margin:5px;">
+    <div class="box-container" id="container">
+      <span id="box1" class="box"></span>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+  <script src="/js/server-sync.js"></script>
+  <script src="/js/test-ui.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      document.querySelector('#userName').textContent = user.name;
+      document.querySelector('#userColour').style.backgroundColor = user.colour;
+
+      socket.on('sync_state', newState => {
+        document.querySelector("#boxPosition").value = newState.scene.ids.box1.left.match(/\d+/)[0];
+      });
+    });
+
+  </script>
+</body>
+
+</html>
