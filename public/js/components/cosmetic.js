@@ -1,3 +1,43 @@
+AFRAME.registerComponent('outlined', {
+  schema: {},
+  init: function () {
+    var shader = {
+      'outline': {
+        vertex_shader: ["uniform float offset;", "void main() {", "vec4 pos = modelViewMatrix * vec4( position + normal * offset, 1.0 );", "gl_Position = projectionMatrix * pos;", "}"].join("\n"),
+        fragment_shader: ["void main(){", "gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );", "}"].join("\n")
+      }
+    };
+
+    var geometry, matColor, matShader, outShader, uniforms;
+    geometry = this.el.object3DMap.mesh.geometry; //new THREE.TorusKnotGeometry(50, 10, 128, 16);
+    matColor = this.el.object3DMap.mesh.material; //new THREE.MeshPhongMaterial(0xffffff);
+    mesh1 = this.el.object3DMap.mesh; //new THREE.Mesh(geometry, matColor);
+    //scene.add(mesh1);
+    uniforms = {
+      offset: {
+        type: "f",
+        value: 0.02
+      }
+    };
+    outShader = shader['outline'];
+    matShader = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: outShader.vertex_shader,
+      fragmentShader: outShader.fragment_shader,
+    });
+    mesh3 = new THREE.Mesh(geometry, matShader);
+    mesh3.material.depthWrite = false;
+    mesh3.quaternion = mesh1.quaternion;
+    mesh3.renderOrder = 1;
+    mesh1.renderOrder = 2;
+    this.el.object3D.add(mesh3);
+  },
+  remove: function () {
+  },
+});
+
+
+
 // Show object ina highlighted state
 AFRAME.registerComponent('halo', {
   schema: {

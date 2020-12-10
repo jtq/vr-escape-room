@@ -33,7 +33,7 @@
     </style>
   </head>
   <body>
-    <a-scene debug shadow="type: pcfsoft; autoUpdate: true;">
+    <a-scene debug shadow="type: pcfsoft; autoUpdate: true;" renderer="sortObjects: true;">
       <a-assets>
         <img id="wood-1" src="images/textures/wood-1-256.jpg">
         <img id="rubikscube" src="images/textures/rubikscube.png">
@@ -42,6 +42,13 @@
         <a-asset-item id="chestofdrawers-obj" src="models/chestofdrawers.obj"></a-asset-item>
         <a-asset-item id="chestofdrawers-drawer-obj" src="models/chestofdrawers-drawer.obj"></a-asset-item>
       </a-assets>
+
+      <a-torus-knot
+        outlined
+        radius="0.5" radius-tubular="0.1" segments-tubular="128" segments-radial="16"
+        color="#ffffff" position="0 1.5 -2" rotation="0 0 0"
+        animation="property:rotation; to:0 360 0; dur:10000; loop:true; easing:linear;"
+        ></a-torus-knot>
 
       <a-entity id="chest" obj-model="obj: #chestofdrawers-obj;" scale="0.01 0.01 0.01" material="src: #wood-1; repeat: 0.05 0.1;" shadow="receive: false; cast: true;" position="0 0 -1.5"><!-- chest of drawers group -->
         <a-box id="note" interaction="interacted:true; rotationOffset:70 0 0; positionOffset:0 50 125; easing:easeInOutCirc;" width="20" depth="30" height="1" position="0 102 0" material="src:#note-texture"></a-box>
