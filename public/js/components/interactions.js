@@ -96,6 +96,9 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
     this.socket.on('sync_state', serverState => this.getServerUpdate(serverState));
 
     this.syncToServer = (id, value) => {
+      if(!id) {
+        console.error('Interactable objects must have an id.  Provided args:', { id, value});
+      }
       this.socket.emit('update_state', {
         scene: {
           ids: {
@@ -192,6 +195,10 @@ AFRAME.registerComponent(INTERACTION_COMPONENT, {
     rotationDuration: {type: 'int', default: 500},
   },
   init: function () {
+
+    if(!this.el.id) {
+      console.error('Interactable objects must have an id', this);
+    }
 
     this.interact = AFRAME.utils.bind(() => {
       ['position', 'rotation'].forEach(componentName => {
