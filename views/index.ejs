@@ -43,12 +43,16 @@
         <a-asset-item id="chestofdrawers-drawer-obj" src="models/chestofdrawers-drawer.obj"></a-asset-item>
       </a-assets>
 
-      <a-torus-knot
-        outlined
-        radius="0.5" radius-tubular="0.1" segments-tubular="128" segments-radial="16"
-        color="#ffffff" position="0 1.5 -2" rotation="0 0 0"
+      <a-entity position="0 1.5 -2" rotation="0 0 0"
         animation="property:rotation; to:0 360 0; dur:10000; loop:true; easing:linear;"
+      >
+        <a-torus-knot id="knot"
+          outlined="colour:#0080ff; opacity:0.75;thickness:0.02;"
+          interaction
+          radius="0.5" radius-tubular="0.1" segments-tubular="256" segments-radial="64"
+          color="#ffffff"
         ></a-torus-knot>
+        </a-entity>
 
       <a-entity id="chest" obj-model="obj: #chestofdrawers-obj;" scale="0.01 0.01 0.01" material="src: #wood-1; repeat: 0.05 0.1;" shadow="receive: false; cast: true;" position="0 0 -1.5"><!-- chest of drawers group -->
         <a-box id="note" interaction="interacted:true; rotationOffset:70 0 0; positionOffset:0 50 125; easing:easeInOutCirc;" width="20" depth="30" height="1" position="0 102 0" material="src:#note-texture"></a-box>

@@ -1,36 +1,37 @@
 AFRAME.registerComponent('outlined', {
-  schema: {},
+  schema: {
+    colour: {type:'color', default:'#ff0000'},
+    opacity: {type:'number', default:'1'},
+    thickness: {type:'number', default:'0.01'},
+  },
   init: function () {
-    var shader = {
-      'outline': {
-        vertex_shader: ["uniform float offset;", "void main() {", "vec4 pos = modelViewMatrix * vec4( position + normal * offset, 1.0 );", "gl_Position = projectionMatrix * pos;", "}"].join("\n"),
-        fragment_shader: ["void main(){", "gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );", "}"].join("\n")
-      }
-    };
-
-    var geometry, matColor, matShader, outShader, uniforms;
-    geometry = this.el.object3DMap.mesh.geometry; //new THREE.TorusKnotGeometry(50, 10, 128, 16);
-    matColor = this.el.object3DMap.mesh.material; //new THREE.MeshPhongMaterial(0xffffff);
-    mesh1 = this.el.object3DMap.mesh; //new THREE.Mesh(geometry, matColor);
-    //scene.add(mesh1);
-    uniforms = {
+    const uniforms = {
       offset: {
         type: "f",
-        value: 0.02
+        value: this.data.thickness
       }
     };
-    outShader = shader['outline'];
-    matShader = new THREE.ShaderMaterial({
+    const colour = new THREE.Color(this.data.colour);
+    const matShader = new THREE.ShaderMaterial({
       uniforms: uniforms,
-      vertexShader: outShader.vertex_shader,
-      fragmentShader: outShader.fragment_shader,
+      vertexShader: ["uniform float offset;", "void main() {", "vec4 pos = modelViewMatrix * vec4( position + normal * offset, 1.0 );", "gl_Position = projectionMatrix * pos;", "}"].join("\n"),
+      fragmentShader: ["void main(){", `gl_FragColor = vec4( ${colour.r}, ${colour.g}, ${colour.b}, ${this.data.opacity} );`, "}"].join("\n")
     });
-    mesh3 = new THREE.Mesh(geometry, matShader);
-    mesh3.material.depthWrite = false;
-    mesh3.quaternion = mesh1.quaternion;
-    mesh3.renderOrder = 1;
-    mesh1.renderOrder = 2;
-    this.el.object3D.add(mesh3);
+
+    var geometry = this.el.object3DMap.mesh.geometry;
+    var existingMesh = this.el.object3DMap.mesh;
+
+    var highlightMesh = new THREE.Mesh(geometry, matShader);
+    highlightMesh.material.depthWrite = false;
+    highlightMesh.quaternion = existingMesh.quaternion;
+
+    highlightMesh.renderOrder = 1;
+    existingMesh.renderOrder = 2;
+
+    existingMesh.material.transparent= true;
+    highlightMesh.material.transparent= true;
+
+    this.el.object3D.add(highlightMesh);
   },
   remove: function () {
   },
@@ -45,7 +46,7 @@ AFRAME.registerComponent('halo', {
   },
   init: function () {
     this.el.object3D.traverse(obj => {
-      if(obj.material && typeof obj.material.originalEmissive === 'undefined') {
+      if(obj.material && typeof obj.material.emissive !== 'undefined' && typeof obj.material.originalEmissive === 'undefined') {
         obj.material.originalEmissive = obj.material.emissive.getHex();
         obj.material.emissive.set(this.data.highlight);
         obj.material.originalEmissiveIntensity = obj.material.emissiveIntensity;
@@ -55,7 +56,7 @@ AFRAME.registerComponent('halo', {
   },
   remove: function () {
     this.el.object3D.traverse(obj => {
-      if(obj.material && (typeof obj.material.originalEmissive !== 'undefined')) {
+      if(obj.material && typeof obj.material.emissive !== 'undefined' && typeof obj.material.originalEmissive !== 'undefined') {
         obj.material.emissive.setHex(obj.material.originalEmissive);
         obj.material.emissiveIntensity = obj.material.originalEmissiveIntensity;
         delete(obj.material.originalEmissive);
