@@ -43,26 +43,15 @@
         <a-asset-item id="chestofdrawers-drawer-obj" src="models/chestofdrawers-drawer.obj"></a-asset-item>
       </a-assets>
 
-      <a-entity position="0 1.5 -2" rotation="0 0 0"
-        animation="property:rotation; to:0 360 0; dur:10000; loop:true; easing:linear;"
-      >
-        <a-torus-knot id="knot"
-          outlined="colour:#0080ff; opacity:0.75;thickness:0.02;"
-          interaction
-          radius="0.5" radius-tubular="0.1" segments-tubular="256" segments-radial="64"
-          color="#ffffff"
-        ></a-torus-knot>
-        </a-entity>
+      <a-entity id="chest" obj-model="obj: #chestofdrawers-obj;" material="src: #wood-1; repeat: 0.05 0.1;" shadow="receive: false; cast: true;" position="0 0 -1.5"><!-- chest of drawers group -->
+        <a-box id="note" interaction="interacted:true; rotationOffset:70 0 0; positionOffset:0 .5 1.25; easing:easeInOutCirc;" width="0.2" depth="0.3" height="0.001" position="0 1.0005 0" material="src:#note-texture"></a-box>
 
-      <a-entity id="chest" obj-model="obj: #chestofdrawers-obj;" scale="0.01 0.01 0.01" material="src: #wood-1; repeat: 0.05 0.1;" shadow="receive: false; cast: true;" position="0 0 -1.5"><!-- chest of drawers group -->
-        <a-box id="note" interaction="interacted:true; rotationOffset:70 0 0; positionOffset:0 50 125; easing:easeInOutCirc;" width="20" depth="30" height="1" position="0 102 0" material="src:#note-texture"></a-box>
-
-        <a-entity id="drawer1" obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 76 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0 0;"></a-entity>
-        <a-entity id="drawer2" obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 52 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.1 0.2;"></a-entity>
-        <a-entity id="drawer3" obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 40;" shadow="receive: true; cast: false;" rotation="0 0 0" position="0 28 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.3 0.5;">
-          <a-box id="rubikscube" src="#rubikscube" interaction selectable-goal width="10" depth="10" height="10" position="0 7 0" rotation="0 13 0"></a-box>
+        <a-entity id="drawer1" obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 0.40;" rotation="0 0 0" position="0 0.76 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0 0;"></a-entity>
+        <a-entity id="drawer2" obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 0.40;" rotation="0 0 0" position="0 0.52 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.1 0.2;"></a-entity>
+        <a-entity id="drawer3" obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 0.40;" shadow="receive: true; cast: true;" rotation="0 0 0" position="0 0.28 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.3 0.5;">
+          <a-box id="rubikscube" src="#rubikscube" shadow="receive: true; cast: true;" interaction selectable-goal width="0.1" depth="0.1" height="0.1" position="0 0.07 0" rotation="0 0.13 0"></a-box>
         </a-entity>
-        <a-entity id="drawer4" obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 40;" rotation="0 0 0" position="0 4 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.7 0.6;"></a-entity>
+        <a-entity id="drawer4" obj-model="obj: #chestofdrawers-drawer-obj;" interaction="positionOffset:0 0 0.40;" rotation="0 0 0" position="0 0.04 0" material="src: #wood-1; repeat: 0.05 0.1; offset: 0.7 0.6;"></a-entity>
       </a-entity>
 
       <a-plane id="floor" shadow="receive: true; cast: false;" position="0 0 0" rotation="-90 0 0" width="6" height="8" color="#7BC8A4"></a-plane>
@@ -73,7 +62,7 @@
         <a-entity id="directionallight" light="type: directional; color: #ffd6aa; intensity: 0.90; castShadow: true;" position="0 1 0"></a-entity>
       </a-entity>
 
-      <a-camera position="0 1.6 0" rotation="0 0 0" look-controls wasd-controls="enabled:false">
+      <a-camera position="0 1.6 0" rotation="0 0 0" look-controls wasd-controls="enabled:false;">
         <a-entity cursor="fuse: false; mouseCursorStylesEnabled: true; rayOrigin:entity" position="0 0 -0.1" scale="1 1 1"
           geometry="primitive: ring; radiusInner: 0.002; radiusOuter: 0.003" material="color: #ff0000; shader: flat"
           animation__enterSize="startEvents:mouseenter; property:scale; from:1 1 1; to:0.2 0.2 0.2; dur:500;"

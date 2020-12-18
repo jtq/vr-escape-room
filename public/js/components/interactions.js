@@ -19,7 +19,7 @@ AFRAME.registerComponent('interactor', {
       const uniqueObjsSet = new WeakSet();
       const uniqueObjsByDistance = [];
 
-      this.oldIntersectedEls.forEach(el => el.removeAttribute('halo'));
+      this.oldIntersectedEls.forEach(el => el.removeAttribute('highlight'));
       this.selectedEl = null;
 
       this.oldIntersectedEls = [ ...this.el.components['raycaster'].intersectedEls];
@@ -43,7 +43,7 @@ AFRAME.registerComponent('interactor', {
         }
 
         if(this.selectedEl) {
-          this.selectedEl.setAttribute('halo', {});
+          this.selectedEl.setAttribute('highlight', {});
         }
       }
     };
