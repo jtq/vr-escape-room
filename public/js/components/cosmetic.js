@@ -89,6 +89,9 @@ AFRAME.registerComponent('halo', {
         side: THREE.DoubleSide,
       });
     };
+
+    this.generateMaterial(this.initialOpacity);
+    this.recursiveHighlight(this.el.object3D);
   },
   remove: function () {
     this.recursiveRemoveHighlight(this.el.object3D);
@@ -98,9 +101,12 @@ AFRAME.registerComponent('halo', {
     this.lastUpdateTime = Date.now();
     this.initialOpacity = this.data.opacity;
 
-    this.generateMaterial(this.initialOpacity);
-    this.recursiveRemoveHighlight(this.el.object3D);
-    this.recursiveHighlight(this.el.object3D);
+    const thickness = new THREE.Vector3(this.data.thickness.x, this.data.thickness.y, this.data.thickness.z);
+    const scale = this.el.getAttribute('scale') || THREE.Vector3(1,1,1);
+    const color = new THREE.Color(this.data.color);
+    this.shaderMaterial.uniforms.offset.value = thickness.divide(scale);
+    this.shaderMaterial.uniforms.opacity.value = this.data.opacity;
+    this.shaderMaterial.uniforms.color.value = color;
   },
   tick: function(time, timeDelta) {
     if(this.data.duration > 0) {
@@ -109,9 +115,7 @@ AFRAME.registerComponent('halo', {
         const timeFractionRemaining = timeRemaining/this.data.duration;
         const newOpacity = this.initialOpacity * timeFractionRemaining;
         if(newOpacity > 0) {
-          this.generateMaterial(newOpacity);
-          this.recursiveRemoveHighlight(this.el.object3D);
-          this.recursiveHighlight(this.el.object3D);
+          this.shaderMaterial.uniforms.opacity.value = newOpacity;
         }
       }
       else {
