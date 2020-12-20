@@ -81,7 +81,6 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
     };
 
     this.registerUser = () => {
-      console.log("Current user", this.user);
       this.socket.emit('set_user', this.user);
     };
 
@@ -89,7 +88,6 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
     this.socket = io.connect(); // Listen on same protocol+domain+port
 
     this.socket.on('connect', () => {
-      console.log('connected:');
       this.registerUser();
     });
 
@@ -99,20 +97,21 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
       if(!id) {
         console.error('Interactable objects must have an id.  Provided args:', { id, value});
       }
-      this.socket.emit('update_state', {
-        scene: {
-          ids: {
-            [id]: {
-              ...value,
-              lastTouched: this.user.name
+      else {
+        this.socket.emit('update_state', {
+          scene: {
+            ids: {
+              [id]: {
+                ...value,
+                lastTouched: this.user.name
+              }
             }
           }
-        }
-      });
+        });
+      }
     };
 
     this.getServerUpdate = (serverState) => {
-      console.log(`received new state: `, this.state, '->', serverState);
       Object.entries(serverState.scene.ids).forEach(([id, serverProps]) => {
         let el = document.querySelector("#"+id);
         this.state.scene.ids[id] = this.state.scene.ids[id] || {};
@@ -121,7 +120,6 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
         let changed = false;
         Object.entries(serverProps).forEach(([prop, serverValue]) => {
           if(ourProps[prop] !== serverValue) {
-            console.log('incoming update:', id, prop, ourProps[prop], '->', serverValue);
             ourProps[prop] = serverValue;
             if(prop !== 'lastTouched') {
               el.setAttribute('interaction', prop, serverValue);
@@ -129,12 +127,17 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
             changed = true;
           }
         });
-        // if(changed && serverProps.lastTouched) {
-        //   const lastToucher = serverState.users[serverProps.lastTouched];
-        //   if(lastToucher) { // Might not be the case if nobody's touched the state, or the last-toucher has since disconnected
-        //     // Flash in owner colour
-        //   }
-        // }
+        if(changed && serverProps.lastTouched) {
+          const lastToucher = serverState.users[serverProps.lastTouched];
+          if(lastToucher) { // Might not be the case if nobody's touched the state, or the last-toucher has since disconnected
+            el.setAttribute('halo', {   // start a new animation to flash the object in the owner's colour
+              color: lastToucher.colour,
+              duration: 2500,
+              opacity: 0.75,
+              forceUpdate: Math.random()  // force an update to halt and restart any animations in progress (specifically, in case we were also the last one to interact with the object so setting the ownerColor alone won't restart the animation)
+            });
+          }
+        }
       });
     };
 

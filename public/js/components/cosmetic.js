@@ -1,8 +1,10 @@
 AFRAME.registerComponent('halo', {
   schema: {
     color: {type:'color', default:'#ff0000'},
-    opacity: {type:'number', default:0.25},
+    opacity: {type:'number', default:0.5},
     thickness: {type:'vec3', default: new THREE.Vector3(0.02, 0.02, 0.02)},
+    duration: {type:'int', default:0},
+    forceUpdate: {type:'number', default:0}
   },
   init: function () {
 
@@ -49,50 +51,73 @@ AFRAME.registerComponent('halo', {
         }
       });
     };
+
+    this.generateMaterial = (opacity) => {
+      const thickness = new THREE.Vector3(this.data.thickness.x, this.data.thickness.y, this.data.thickness.z);
+      const scale = this.el.getAttribute('scale') || THREE.Vector3(1,1,1);
+      const color = new THREE.Color(this.data.color);
+      const uniforms = {
+        offset: {
+          type: "vec3",
+          value: thickness.divide(scale)
+        },
+        opacity: {
+          type: "float",
+          value: opacity
+        },
+        color: {
+          type: "vec3",
+          value: color
+        }
+      };
+      this.shaderMaterial = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader:`
+        uniform vec3 offset;
+        void main() {
+          vec4 pos = modelViewMatrix * vec4( position + (normalize(normal) * offset), 1.0 );
+          gl_Position = projectionMatrix * pos;
+        }
+        `,
+        fragmentShader:`
+        uniform float opacity;
+        uniform vec3 color;
+        void main() {
+          gl_FragColor = vec4( color, opacity );
+        }
+        `,
+        side: THREE.DoubleSide,
+      });
+    };
   },
   remove: function () {
     this.recursiveRemoveHighlight(this.el.object3D);
   },
   update: function (oldData) {
 
-    const thickness = new THREE.Vector3(this.data.thickness.x, this.data.thickness.y, this.data.thickness.z);
-    const scale = this.el.getAttribute('scale') || THREE.Vector3(1,1,1);
-    const color = new THREE.Color(this.data.color);
-    const uniforms = {
-      offset: {
-        type: "vec3",
-        value: thickness.divide(scale)
-      },
-      opacity: {
-        type: "float",
-        value: this.data.opacity
-      },
-      color: {
-        type: "vec3",
-        value: color
-      }
-    };
-    this.shaderMaterial = new THREE.ShaderMaterial({
-      uniforms: uniforms,
-      vertexShader:`
-      uniform vec3 offset;
-      void main() {
-        vec4 pos = modelViewMatrix * vec4( position + (normalize(normal) * offset), 1.0 );
-        gl_Position = projectionMatrix * pos;
-      }
-      `,
-      fragmentShader:`
-      uniform float opacity;
-      uniform vec3 color;
-      void main() {
-        gl_FragColor = vec4( color, opacity );
-      }
-      `,
-      side: THREE.DoubleSide,
-    });
+    this.lastUpdateTime = Date.now();
+    this.initialOpacity = this.data.opacity;
 
+    this.generateMaterial(this.initialOpacity);
     this.recursiveRemoveHighlight(this.el.object3D);
     this.recursiveHighlight(this.el.object3D);
+  },
+  tick: function(time, timeDelta) {
+    if(this.data.duration > 0) {
+      const timeRemaining = this.lastUpdateTime + this.data.duration - Date.now();
+      if(timeRemaining > 0) {
+        const timeFractionRemaining = timeRemaining/this.data.duration;
+        const newOpacity = this.initialOpacity * timeFractionRemaining;
+        if(newOpacity > 0) {
+          this.generateMaterial(newOpacity);
+          this.recursiveRemoveHighlight(this.el.object3D);
+          this.recursiveHighlight(this.el.object3D);
+        }
+      }
+      else {
+        this.el.removeAttribute('halo');
+      }
+    }
   }
 });
 
