@@ -88,7 +88,7 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
     this.socket = io.connect(); // Listen on same protocol+domain+port
 
     this.socket.on('connect', () => {
-      this.registerUser();
+      //this.registerUser();  // Now triggeed by user-name input in init dialogue
     });
 
     this.socket.on('sync_state', serverState => this.getServerUpdate(serverState));
