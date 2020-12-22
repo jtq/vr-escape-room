@@ -10,7 +10,7 @@
         visibility: hidden;
       }
 
-      .init-box {
+      #init-box {
         position: absolute;
         width: 100%;
         height: 100%;
@@ -22,10 +22,10 @@
         border: 1px solid #c0c0c0;
         font-size: 4vh;
         font-family: monospace;
-        z-index: 100000;
+        z-index: 100001;
       }
 
-      .init-box ol {
+      #init-box ol {
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -34,25 +34,25 @@
         list-style-type: none;
       }
 
-      .init-box ol li {
+      #init-box ol li {
         flex-grow: 1;
         margin: 0 auto;
         width: 75vw;
       }
 
-      .init-box li * {
+      #init-box li * {
         font-size: inherit;
       }
 
-      .init-box ol p {
+      #init-box ol p {
         margin: 0 0 0.5em 0;
       }
 
-      .init-box ol p.note {
+      #init-box ol p.note {
         font-size: 75%;
       }
 
-      .init-box button {
+      #init-box button {
         border-radius: 5px;
         background-color: #e0f8f8;
         border: 3px solid #a0d8d8;
@@ -61,14 +61,54 @@
         padding: 1vw;
       }
 
-      .init-box button[disabled] {
+      #init-box button[disabled] {
         background-color: #f8f8f8;
         border: 3px solid #d8d8d8;
         color: #d8d8d8;
       }
 
-      .init-box li input {
+      #init-box li input {
         width: 98%;
+      }
+
+      #user-list {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: 100000;
+        border: 3px solid rgba(192, 192, 192, 0.5);
+        border-radius: 10px;
+        background-color: rgba(192, 192, 192, 0.25);
+        margin: 0;
+        padding: 0.5vw;
+        max-width: 25vw;
+        overflow: auto;
+      }
+
+      #user-list li {
+        font-family: monospace;
+        list-style-type: none;
+        padding: 0.25vh 0;
+        margin: 0;
+        color: #ffffff;
+        text-shadow:
+          -1px -1px 1px #101010,
+          1px -1px 1px #101010,
+          -1px 1px 1px #101010,
+          1px 1px 1px #101010;
+        white-space: nowrap;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: .25em .4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: .25rem;
       }
     </style>
   </head>
@@ -113,8 +153,9 @@
           interactor
         ></a-entity>
       </a-camera>
+      <ul id="user-list"></ul>
     </a-scene>
-    <div class="init-box">
+    <div id="init-box">
       <ol>
         <li>
           <p>1. Enter your name in the box below:</p>
@@ -134,9 +175,10 @@
     <script>
       window.addEventListener('load', () => {
 
-        const initDialog = document.querySelector('.init-box');
-        const nameInput = document.querySelector('.init-box input');
-        const initButton = document.querySelector('.init-box button');
+        const initDialog = document.querySelector('#init-box');
+        const nameInput = document.querySelector('#init-box input');
+        const initButton = document.querySelector('#init-box button');
+        const userList = document.querySelector('#user-list');
         const scene = document.querySelector('a-scene');
         const interactionSystem = document.querySelector('a-scene').systems['interaction'];
 
@@ -163,6 +205,14 @@
           scene.requestFullscreen({
             navigationUI: 'hide'
           });
+        });
+
+        interactionSystem.socket.on('sync_state', (serverState) => {
+          userList.innerHTML = Object.keys(serverState.users)
+            .sort()
+            .map(u => serverState.users[u])
+            .map(u => `<li><span class="badge" style="background-color:${u.colour};">&nbsp;&nbsp;</span> ${u.name}</li>`)
+            .join('\n');
         });
       });
     </script>
