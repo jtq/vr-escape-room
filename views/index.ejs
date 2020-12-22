@@ -140,9 +140,17 @@
         const scene = document.querySelector('a-scene');
         const interactionSystem = document.querySelector('a-scene').systems['interaction'];
 
-        scene.addEventListener('loaded', e => {
-          nameInput.style.boxShadow = "0px 0px 5px 5px " + interactionSystem.user.colour;
-        });
+        const waitForUserColour = e => {
+          if(interactionSystem.user.colour) {
+            console.log('Got user colour from server', interactionSystem.user.colour);
+            nameInput.style.boxShadow = "0px 0px 5px 5px " + interactionSystem.user.colour;
+          }
+          else {
+            console.log('Waiting for user colour from server...');
+            setTimeout(waitForUserColour, 250);
+          }
+        }
+        scene.addEventListener('loaded', waitForUserColour);
 
         nameInput.addEventListener('input', e => {
           initButton.disabled = (e.target.value.length === 0);

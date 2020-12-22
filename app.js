@@ -71,12 +71,47 @@ function clearState() {
   io.sockets.emit('sync_state', state);
 }
 
+// Generate pronouceable usernames from 3-6 chars with alternating consonantsand vowels.
+function getRandomUsername() {
+  const vowels = "aeiou";
+  const consonants = "bcdfghjklmnpqrstvwxyz";
+  const name = " ".repeat(randomBetween(3,6)).split("");
+  return name.map((c, i) => {
+    if(i % 2 === 1) {
+      return consonants[randomBetween(0, consonants.length-1)];
+    }
+    else {
+      return vowels[randomBetween(0, vowels.length-1)];
+    }
+  }).join("");
+}
+
+function getRandomColour() {
+  return "#" +
+    ("0"+((randomBetween(0, 16) * 16) - 1).toString(16)).substr(-2) +
+    ("0"+((randomBetween(0, 16) * 16) - 1).toString(16)).substr(-2) +
+    ("0"+((randomBetween(0, 16) * 16) - 1).toString(16)).substr(-2);
+}
+
+function randomBetween(lowest, highest) {
+  const range = highest - lowest;
+  return Math.ceil(Math.random()*range)+lowest;
+}
+
 io.on('connection', socket => {
   socket.user = {};
   console.log(`New user connected (anonymous)`);
 
   socket.on('set_user', data => {
     console.log(`set_user: ${socket.user.name} changed settings to ${JSON.stringify(data)}`);
+    if(!data.colour) {  // Randomly assign a colour if the user hasn't specified one
+      data.colour = getRandomColour();
+      console.log(`set_user: system set default colour for ${data.name}: ${JSON.stringify(data)}`);
+    }
+
+    if(state.users[socket.user.name]) { // Remove any old user from state in case name has changed
+      delete(state.users[socket.user.name]);
+    }
     socket.user = data;
     state.users = mergeState({}, state.users, { [data.name]: data });
     io.sockets.emit('sync_state', state);
@@ -100,7 +135,7 @@ io.on('connection', socket => {
     }
   });
 
-  io.sockets.emit('sync_state', state); // Send initial world-state on connect
+  //io.sockets.emit('sync_state', state); // Send initial world-state on connect
 });
 
 const mergeState = (target, ...objs) => {

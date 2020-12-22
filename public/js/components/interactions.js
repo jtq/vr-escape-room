@@ -70,7 +70,7 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
   init: function() {
     this.user = {
       name: getRandomUsername(),
-      colour: getRandomColour()
+      //colour: getRandomColour()
     };
 
     this.state = {
@@ -88,7 +88,7 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
     this.socket = io.connect(); // Listen on same protocol+domain+port
 
     this.socket.on('connect', () => {
-      //this.registerUser();  // Now triggeed by user-name input in init dialogue
+      this.registerUser();  // Now triggeed by user-name input in init dialogue
     });
 
     this.socket.on('sync_state', serverState => this.getServerUpdate(serverState));
@@ -112,6 +112,11 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
     };
 
     this.getServerUpdate = (serverState) => {
+
+      if(serverState.users[this.user.name]) {
+        this.user = serverState.users[this.user.name];
+      }
+
       Object.entries(serverState.scene.ids).forEach(([id, serverProps]) => {
         let el = document.querySelector("#"+id);
         this.state.scene.ids[id] = this.state.scene.ids[id] || {};
@@ -156,13 +161,6 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
           return vowels[randomBetween(0, vowels.length-1)];
         }
       }).join("");
-    }
-
-    function getRandomColour() {
-      return "#" +
-        ("0"+((randomBetween(0, 16) * 16) - 1).toString(16)).substr(-2) +
-        ("0"+((randomBetween(0, 16) * 16) - 1).toString(16)).substr(-2) +
-        ("0"+((randomBetween(0, 16) * 16) - 1).toString(16)).substr(-2);
     }
 
     function randomBetween(lowest, highest) {
