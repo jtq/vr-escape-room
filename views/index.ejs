@@ -5,6 +5,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
     <script src="/js/components/interactions.js"></script>
     <script src="/js/components/cosmetic.js"></script>
+    <script>
+      window.user = <%- JSON.stringify(user, null, 2) %>;
+    </script>
     <style>
       div.a-enter-ar {
         visibility: hidden;
@@ -182,17 +185,9 @@
         const scene = document.querySelector('a-scene');
         const interactionSystem = document.querySelector('a-scene').systems['interaction'];
 
-        const waitForUserColour = e => {
-          if(interactionSystem.user.colour) {
-            console.log('Got user colour from server', interactionSystem.user.colour);
-            nameInput.style.boxShadow = "0px 0px 5px 5px " + interactionSystem.user.colour;
-          }
-          else {
-            console.log('Waiting for user colour from server...');
-            setTimeout(waitForUserColour, 250);
-          }
-        }
-        scene.addEventListener('loaded', waitForUserColour);
+        nameInput.style.boxShadow = "0px 0px 5px 5px " + window.user.colour;
+
+        scene.addEventListener('loaded', () => {});
 
         nameInput.addEventListener('input', e => {
           initButton.disabled = (e.target.value.length === 0);
@@ -200,8 +195,8 @@
 
         initButton.addEventListener('click', e => {
           initDialog.style.display = 'none';
-          interactionSystem.user.name = nameInput.value;
-          interactionSystem.registerUser();
+          window.user.name = nameInput.value;
+          interactionSystem.registerUser(window.user);
           scene.requestFullscreen({
             navigationUI: 'hide'
           });

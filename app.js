@@ -7,7 +7,12 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-  res.render('index');
+  res.render('index', {
+    user: {
+      name: getRandomUsername(),
+      colour: getRandomColour()
+    }
+  });
 });
 app.get('/admin', (req, res) => {
   res.render('admin', { state });
@@ -104,10 +109,6 @@ io.on('connection', socket => {
 
   socket.on('set_user', data => {
     console.log(`set_user: ${socket.user.name} changed settings to ${JSON.stringify(data)}`);
-    if(!data.colour) {  // Randomly assign a colour if the user hasn't specified one
-      data.colour = getRandomColour();
-      console.log(`set_user: system set default colour for ${data.name}: ${JSON.stringify(data)}`);
-    }
 
     if(state.users[socket.user.name]) { // Remove any old user from state in case name has changed
       delete(state.users[socket.user.name]);

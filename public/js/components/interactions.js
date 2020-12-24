@@ -68,10 +68,7 @@ AFRAME.registerComponent('interactor', {
 
 AFRAME.registerSystem(INTERACTION_COMPONENT, {
   init: function() {
-    this.user = {
-      name: getRandomUsername(),
-      //colour: getRandomColour()
-    };
+    this.user = window.user;
 
     this.state = {
       users: {},
@@ -80,7 +77,10 @@ AFRAME.registerSystem(INTERACTION_COMPONENT, {
       }
     };
 
-    this.registerUser = () => {
+    this.registerUser = (userDetails) => {
+      if(userDetails) {
+        this.user = userDetails;
+      }
       this.socket.emit('set_user', this.user);
     };
 

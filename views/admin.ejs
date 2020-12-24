@@ -3,6 +3,9 @@
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script>
+      window.state = <%- JSON.stringify(state, null, 2) %>;
+    </script>
     <style>
     </style>
   </head>
@@ -25,13 +28,19 @@ function setConnectionStatus(status, badge) {
 }
 
 function replacer(key, value) {
-  console.log(key, '=', value);
   if(key === 'colour'){
     value = value+" <span class='badge' style='background-color:"+value+";'>&nbsp;&nbsp;&nbsp;</span>";
   }
-  console.log(key, '=', value);
   return value;
 }
+
+function updateWorldStateDisplay(stateObject) {
+  console.log(`received new state: `, stateObject);
+  document.getElementById('worldState').innerHTML = JSON.stringify(stateObject, replacer, 2);
+}
+
+updateWorldStateDisplay(window.state);
+
 // Socket
 let socket = io.connect(); // Listen on same protocol+domain+port
 
@@ -39,10 +48,7 @@ socket.on('connect', () => setConnectionStatus('connected', 'success'));
 socket.on('disconnect', () => setConnectionStatus('disconnected', 'warning'));
 socket.on('error', () => setConnectionStatus('error', 'error'));
 
-socket.on('sync_state', newState => {
-  console.log(`received new state: `, newState);
-  document.getElementById('worldState').innerHTML = JSON.stringify(newState, replacer, 2);
-});
+socket.on('sync_state', updateWorldStateDisplay);
     </script>
   </body>
 </html>
